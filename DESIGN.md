@@ -53,6 +53,7 @@ Run 'zk help get' for details.                                         | err 2
 
 ```
 $ zk get /path /another
+error: too many arguments
 Usage: zk get <path> [--watch]
 Run 'zk help get' for details.
 ```
@@ -61,3 +62,8 @@ Run 'zk help get' for details.
 $ echo "try" | zk create /path
 error: node already exists                                             | err 1
 ```
+
+```
+$ hk wat
+error: unrecognized command "wat"
+Run 'zk help' for usage.
