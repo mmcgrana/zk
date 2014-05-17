@@ -66,7 +66,7 @@ func main() {
 	var cmdExistsWatch bool
 	cmdExists := &cobra.Command{
 		Use: "exists <path> [--watch]",
-		Short: "show whether a node exists",
+		Short: "show if a node exists",
 		Long: `
 Exists checks for a node at the given path and writes "y" or "n" to
 stdout according to its presence. If --watch is used, waits for a
@@ -170,7 +170,7 @@ reading stdin.`,
 
 	cmdSet := &cobra.Command {
 		Use: "set <path> [version]",
-		Short: "set node data",
+		Short: "write node data",
 		Long: `
 Set updates the node at the given path with the data given by reading
 stdin. If a version is given, submits that version with the write
