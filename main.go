@@ -57,17 +57,17 @@ overview usage if no command is specified.`,
 }
 
 func runHelp(cmd *Command, args []string) {
+	if len(args) > 1 {
+		fmt.Fprintf(os.Stderr, "error: too many arguments")
+		os.Exit(2)
+	}
 	if len(args) == 0 {
 		printOverviewUsage(os.Stdout)
 		return
 	}
-	if len(args) != 1 {
-		fmt.Fprintf(os.Stderr, "error: too many arguments")
-		os.Exit(2)
-	}
-	for _, cmd := range commands {
-		if cmd.Name() == args[0] {
-			printLongUsage(cmd)
+	for _, c := range commands {
+		if c.Name() == args[0] {
+			printLongUsage(c)
 			return
 		}
 	}
@@ -121,22 +121,9 @@ func main() {
 	os.Exit(2)
 }
 
-func inData() []byte {
-	data, err := ioutil.ReadAll(os.Stdin)
-	if err != nil {
-		panic(err)
-	}
-	return data
-}
-
-func outString(p string, args ...interface{}) {
-	_, err := fmt.Fprintf(os.Stdout, p, args...)
-	must(err)
-}
-
-func outData(d []byte) {
-	_, err := os.Stdout.Write(d)
-	must(err)
+func failUsage(cmd *Command) {
+	printAbbrevUsage(cmd)
+	os.Exit(2)
 }
 
 func must(err error) {
@@ -147,7 +134,15 @@ func must(err error) {
 	}
 }
 
-func failUsage(cmd *Command) {
-	printAbbrevUsage(cmd)
-	os.Exit(2)
+func inData() []byte {
+	data, _ := ioutil.ReadAll(os.Stdin)
+	return data
+}
+
+func outString(p string, args ...interface{}) {
+	fmt.Fprintf(os.Stdout, p, args...)
+}
+
+func outData(d []byte) {
+	os.Stdout.Write(d)
 }
