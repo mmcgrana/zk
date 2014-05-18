@@ -19,7 +19,7 @@ var (
 
 var cmdExists = &Command{
 	Usage: "exists <path> [--watch]",
-	Short: "show if a node exists",
+	Short: "show if node exists",
 	Long: `
 Exists checks for a node at the given path and writes "y" or "n" to
 stdout according to its presence. If --watch is used, waits for a
@@ -203,7 +203,7 @@ func runDelete(cmd *Command, args []string) {
 
 var cmdChildren = &Command{
 	Usage: "children <path> [--watch]",
-	Short: "list children of a node",
+	Short: "list node children",
 	Long: `
 Children lists the names of the children of the node at the given
 path, one name per line. If --watch is used, it waits for a change

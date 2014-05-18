@@ -14,6 +14,7 @@ Commands:                                                              | out
     set         write node data                                        | out
     delete      delete node                                            | out
     children    list node children                                     | out
+    help        show help                                              | out
                                                                        | out
 Run 'zk help <command>' for details.                                   | out 0
 ```
