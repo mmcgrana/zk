@@ -1,2 +1,2 @@
 cli accept other zookeeper hosts
-cli style
+design -> readme
