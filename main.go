@@ -3,13 +3,9 @@ package main
 import (
 	"fmt"
 	"github.com/bgentry/pflag"
-	"github.com/samuel/go-zookeeper/zk"
 	"io/ioutil"
 	"os"
-	"sort"
-	"strconv"
 	"strings"
-	"time"
 )
 
 type Command struct {
@@ -21,24 +17,13 @@ type Command struct {
 }
 
 func (c *Command) PrintUsage() {
-	if c.Runnable() {
-		fmt.Fprintf(os.Stderr, "Usage: hk %s\n", c.FullUsage())
-	}
-	fmt.Fprintf(os.Stderr, "Use 'hk help %s' for more information.\n", c.Name())
+	fmt.Fprintf(os.Stderr, "Usage: zk %s\n", c.Usage)
+	fmt.Fprintf(os.Stderr, "Run 'zk help %s' for details.\n", c.Name())
 }
 
 func (c *Command) PrintLongUsage() {
-	if c.Runnable() {
-		fmt.Printf("Usage: hk %s\n\n", c.FullUsage())
-	}
+	fmt.Printf("Usage: zk %s\n\n", c.Usage)
 	fmt.Println(strings.Trim(c.Long, "\n"))
-}
-
-func (c *Command) FullUsage() string {
-	if c.NeedsApp {
-		return c.Name() + " [-a <app or remote>]" + strings.TrimPrefix(c.Usage, c.Name())
-	}
-	return c.Usage
 }
 
 func (c *Command) Name() string {
@@ -67,17 +52,13 @@ func (c *Command) ShortExtra() string {
 // func printUsageTo(..., ...) {
 // 	...
 // }
-//
-// func printError(...) {
-//
-// }
 
 var commands = []*Command{
 	cmdExists,
 	cmdStat,
 	cmdGet,
 	cmdCreate,
-	mdSet,
+	cmdSet,
 	cmdDelete,
 	cmdChildren,
 }
@@ -93,11 +74,11 @@ func main() {
 		if cmd.Name() == args[0] {
 			cmd.Flag.SetInterspersed(true)
 			cmd.Flag.Usage = cmd.PrintUsage
-			if err := cmd.Flag.Parse(args[1:]); err == flag.ErrHelp {
+			if err := cmd.Flag.Parse(args[1:]); err == pflag.ErrHelp {
 				cmdHelp.Run(cmdHelp, args[:1])
 				return
 			} else if err != nil {
-				printError(err.Error())
+				fmt.Fprintf(os.Stderr, "error: %s\n", err.Error())
 				os.Exit(2)
 			}
 			cmd.Run(cmd, cmd.Flag.Args())
@@ -110,15 +91,7 @@ func main() {
 	os.Exit(2)
 }
 
-func connect() *zk.Conn {
-	conn, _, err := zk.Connect([]string{"127.0.0.1:2181"}, time.Second)
-	if err != nil {
-		panic(err)
-	}
-	return conn
-}
-
-func input() []byte {
+func inData() []byte {
 	data, err := ioutil.ReadAll(os.Stdin)
 	if err != nil {
 		panic(err)
@@ -126,34 +99,23 @@ func input() []byte {
 	return data
 }
 
-func fail(err error) {
+func outString(p string, args ...interface{}) {
+	_, err := fmt.Fprintf(os.Stdout, p, args...)
+	must(err)
+}
+
+func outData(d []byte) {
+	_, err := os.Stdout.Write(d)
+	must(err)
+}
+
+func must(err error) {
 	errString := strings.TrimPrefix(err.Error(), "zk: ")
 	fmt.Fprintf(os.Stderr, "error: %s\n", errString)
 	os.Exit(1)
 }
 
-func must(err error) {
-	if err != nil {
-		fail(err)
-	}
-}
-
-func failUsage(cmd *cobra.Command) {
-	cmd.Usage()
+func failUsage(cmd *Command) {
+	cmd.PrintUsage()
 	os.Exit(2)
-}
-
-func outputBool(b bool) {
-	var out string
-	if b {
-		out = "y"
-	} else {
-		out = "n"
-	}
-	fmt.Fprintln(os.Stdout, out)
-}
-
-func formatTime(millis int64) string {
-	t := time.Unix(0, millis*1000000)
-	return t.Format(time.RFC3339)
 }

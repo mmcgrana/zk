@@ -15,22 +15,22 @@ Commands:                                                              | out
     delete             delete node                                     | out
     children           list node children                              | out
                                                                        | out
-Run 'hk help <command>' for details.                                   | out 0
+Run 'zk help <command>' for details.                                   | out 0
 ```
 
 ```
 $ zk help get
-Usage: hk get <path> [--watch]                                         | out
+Usage: zk get <path> [--watch]                                         | out
                                                                        | out
 Get reads the node data at the given path and writes it to stdout. If  | out
 --watch is used, waits for a change to the node before exiting.        | out
                                                                        | out
 Examples:                                                              | out
                                                                        | out
-    $ hk get /foo                                                      | out
+    $ zk get /foo                                                      | out
     bar                                                                | out
                                                                        | out
-    $ hk get /foo --watch                                              | out
+    $ zk get /foo --watch                                              | out
     bar                                                                | out 0
 ```
 
@@ -64,6 +64,6 @@ error: node already exists                                             | err 1
 ```
 
 ```
-$ hk wat
+$ zk wat
 error: unrecognized command "wat"
 Run 'zk help' for usage.
