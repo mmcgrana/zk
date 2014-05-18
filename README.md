@@ -62,13 +62,11 @@ requested node. For example:
 ```console
 $ bash -c "sleep 10; echo second-value | zk set /key"
 
-$ zk get /key --watch
+$ zk get /key --watch   # pauses for ~10s, then returns
 first-value
-# pauses for ~10s, then returns
 
-$ zk get /key
+$ zk get /key           # returns immediately
 second-value
-# returns immediately
 ```
 
 ### Server Configuration
