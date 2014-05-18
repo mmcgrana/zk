@@ -76,7 +76,7 @@ more different Zookeepers to target, export `ZOOKEPER_SERVERS` in
 `host:port` format with a `,` between each server. For example:
 
 ```console
-$ export ZOOKEEPER_HOSTS=23.22.49.116:2181,23.20.114.164:2181,54.197.120.188:2181
+$ export ZOOKEEPER_SERVERS=23.22.49.116:2181,23.20.114.164:2181,54.197.120.188:2181
 $ zk ...
 ```
 
@@ -94,9 +94,6 @@ The `zk` project borrows much of its CLI scaffolding and therefore
 CLI aesthetic from the [`hk`](https://github.com/heroku/hk) project.
 Like `hk`, `zk` is designed to behave like a standard Unix tool and
 be composed with other such tools.
-
-Copyright of the borrowed portions of `zk`'s code remains with the
-`hk` project.
 
 ### Contributing
 
