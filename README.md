@@ -31,6 +31,28 @@ namespace
 zookeeper
 ```
 
+### Usage Details
+
+Use `zk help` or `zk help <command>` to see full usage details:
+
+```console
+$ zk help
+Usage: zk <command> [arguments] [options]
+
+Commands:
+
+    exists      show if node exists
+    stat        show node details
+    get         show node data
+    create      create node with initial data
+    set         write node data
+    delete      delete node
+    children    list node children
+    help        show help
+
+Run 'zk help <command>' for details.
+```
+
 ### Watches
 
 Commands `exists`, `get`, and `children` accept `--watch` options
@@ -58,28 +80,6 @@ more different Zookeepers to target, export `ZOOKEPER_SERVERS` in
 ```console
 $ export ZOOKEEPER_HOSTS=23.22.49.116:2181,23.20.114.164:2181,54.197.120.188:2181
 $ zk ...
-```
-
-### Usage Details
-
-Use `zk help` or `zk help <command>` to see full usage details:
-
-```console
-$ zk help
-Usage: zk <command> [arguments] [options]
-
-Commands:
-
-    exists      show if node exists
-    stat        show node details
-    get         show node data
-    create      create node with initial data
-    set         write node data
-    delete      delete node
-    children    list node children
-    help        show help
-
-Run 'zk help <command>' for details.
 ```
 
 ### Other Zookeeper CLIs
