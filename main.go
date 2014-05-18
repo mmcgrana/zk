@@ -77,14 +77,19 @@ func runHelp(cmd *Command, args []string) {
 	os.Exit(2)
 }
 
-var commands = []*Command{
-	cmdExists,
-	cmdStat,
-	cmdGet,
-	cmdCreate,
-	cmdSet,
-	cmdDelete,
-	cmdChildren,
+var commands []*Command
+
+func init() {
+	commands = []*Command{
+		cmdExists,
+		cmdStat,
+		cmdGet,
+		cmdCreate,
+		cmdSet,
+		cmdDelete,
+		cmdChildren,
+		cmdHelp,
+	}
 }
 
 func main() {

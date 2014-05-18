@@ -93,8 +93,8 @@ var cmdGet = &Command{
 	Usage: "get <path> [--watch]",
 	Short: "show node data",
 	Long: `
-Get reads the node data at the given path and writes it to stdout. If
---watch is used, waits for a change to the node before exiting.`,
+Get reads the node data at the given path and writes it to stdout.
+If --watch is used, waits for a change to the node before exiting.`,
 	Run: runGet,
 }
 
@@ -143,10 +143,10 @@ var cmdSet = &Command {
 	Usage: "set <path> [version]",
 	Short: "write node data",
 	Long: `
-Set updates the node at the given path with the data given by reading
-stdin. If a version is given, submits that version with the write
-request for verification, otherwise reads the current version before
-attempting a write.`,
+Set updates the node at the given path with the data given by
+reading stdin. If a version is given, submits that version with the
+write request for verification, otherwise reads the current version
+before attempting a write.`,
 	Run: runSet,
 }
 
@@ -208,8 +208,8 @@ var cmdChildren = &Command {
 	Short: "list children of a node",
 	Long: `
 Children lists the names of the children of the node at the given
-path, one name per line. If --watch is used, waits for a change in the
-names of given node's children before returning.`,
+path, one name per line. If --watch is used, it waits for a change
+in the names of given node's children before returning.`,
 	Run: runChildren,
 }
 
