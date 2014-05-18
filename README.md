@@ -9,7 +9,7 @@ and Unix-friendly.
 Install with:
 
 ```console
-$ go get github.com/mmcgrana/hk
+$ go get github.com/mmcgrana/zk
 ```
 
 And use with e.g.:
@@ -52,7 +52,7 @@ second-value
 ### Server Configuration
 
 By default the client targets `127.0.0.1:2181`. To configure one or
-more different Zookeepers to target, export `ZOOKEPER_HOSTS` in
+more different Zookeepers to target, export `ZOOKEPER_SERVERS` in
 `host:port` format with a `,` between each server. For example:
 
 ```console

@@ -2,13 +2,23 @@ package main
 
 import (
 	"github.com/samuel/go-zookeeper/zk"
+	"os"
 	"sort"
+	"strings"
 	"strconv"
 	"time"
 )
 
+func servers() []string {
+	s := os.Getenv("ZOOKEEPER_SERVERS")
+	if s == "" {
+		s = "127.0.0.1:2181"
+	}
+	return strings.Split(s, ",")
+}
 func connect() *zk.Conn {
-	conn, _, err := zk.Connect([]string{"127.0.0.1:2181"}, time.Second)
+	svs := servers()
+	conn, _, err := zk.Connect(svs, time.Second)
 	must(err)
 	return conn
 }
