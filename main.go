@@ -26,11 +26,6 @@ func (c *Command) Name() string {
 	return name
 }
 
-func (c *Command) PrintUsage() {
-	fmt.Fprintf(os.Stderr, "Usage: zk %s\n", c.Usage)
-	fmt.Fprintf(os.Stderr, "Run 'zk help %s' for details.\n", c.Name())
-}
-
 func printOverviewUsage(w io.Writer) {
 	fmt.Fprintf(w, "Usage: zk <command> [options] [arguments]\n")
 	fmt.Fprintf(w, "\n")
@@ -42,9 +37,14 @@ func printOverviewUsage(w io.Writer) {
 	fmt.Fprintf(w, "Run 'zk help <command>' for details.\n")
 }
 
-func printCommandUsage(c *Command) {
+func printLongUsage(c *Command) {
 	fmt.Printf("Usage: zk %s\n\n", c.Usage)
 	fmt.Println(strings.Trim(c.Long, "\n"))
+}
+
+func printAbbrevUsage(c *Command) {
+	fmt.Fprintf(os.Stderr, "Usage: zk %s\n", c.Usage)
+	fmt.Fprintf(os.Stderr, "Run 'zk help %s' for details.\n", c.Name())
 }
 
 var cmdHelp = &Command{
@@ -67,7 +67,7 @@ func runHelp(cmd *Command, args []string) {
 	}
 	for _, cmd := range commands {
 		if cmd.Name() == args[0] {
-			printCommandUsage(cmd)
+			printLongUsage(cmd)
 			return
 		}
 	}
@@ -101,7 +101,9 @@ func main() {
 	for _, cmd := range commands {
 		if cmd.Name() == args[0] {
 			cmd.Flag.SetInterspersed(true)
-			cmd.Flag.Usage = cmd.PrintUsage
+			cmd.Flag.Usage = func() {
+				printAbbrevUsage(cmd)
+			}
 			if err := cmd.Flag.Parse(args[1:]); err == pflag.ErrHelp {
 				cmdHelp.Run(cmdHelp, args[:1])
 				return
@@ -146,6 +148,6 @@ func must(err error) {
 }
 
 func failUsage(cmd *Command) {
-       cmd.PrintUsage()
-       os.Exit(2)
+	printAbbrevUsage(cmd)
+	os.Exit(2)
 }
