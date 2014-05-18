@@ -139,9 +139,11 @@ func outData(d []byte) {
 }
 
 func must(err error) {
-	errString := strings.TrimPrefix(err.Error(), "zk: ")
-	fmt.Fprintf(os.Stderr, "error: %s\n", errString)
-	os.Exit(1)
+	if err != nil {
+		errString := strings.TrimPrefix(err.Error(), "zk: ")
+		fmt.Fprintf(os.Stderr, "error: %s\n", errString)
+		os.Exit(1)
+	}
 }
 
 func failUsage(cmd *Command) {
