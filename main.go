@@ -108,7 +108,6 @@ func main() {
 				cmdHelp.Run(cmdHelp, args[:1])
 				return
 			} else if err != nil {
-				fmt.Fprintf(os.Stderr, "error: %s\n", err.Error())
 				os.Exit(2)
 			}
 			cmd.Run(cmd, cmd.Flag.Args())
