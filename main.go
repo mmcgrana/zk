@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/bgentry/pflag"
+	"io"
 	"io/ioutil"
 	"os"
 	"strings"
@@ -35,23 +36,46 @@ func (c *Command) Name() string {
 	return name
 }
 
-const extra = " (extra)"
-
-func (c *Command) List() bool {
-	return c.Short != "" && !strings.HasSuffix(c.Short, extra)
+func printOverviewUsage(w io.Writer) {
+	fmt.Fprintf(w, "Usage: zk <command> [options] [arguments]\n")
+	fmt.Fprintf(w, "\n")
+	fmt.Fprintf(w, "Commands:\n")
+	for _, command := range commands {
+		fmt.Fprintf(w, "    %-8s    %s\n", command.Name(), command.Short)
+	}
+	fmt.Fprintf(w, "\n")
+	fmt.Fprintf(w, "Run 'zk help <command>' for details.\n")
 }
 
-func (c *Command) ListAsExtra() bool {
-	return c.Short != "" && strings.HasSuffix(c.Short, extra)
+var cmdHelp = &Command{
+	Usage: "help [<command>]",
+	Short: "show help",
+	Long: `
+Help shows usage details for a single command if one is given, or
+overview usage if no command is specified.`,
+	Run: runHelp,
 }
 
-func (c *Command) ShortExtra() string {
-	return c.Short[:len(c.Short)-len(extra)]
-}
+func runHelp(cmd *Command, args []string) {
+	if len(args) == 0 {
+		printOverviewUsage(os.Stdout)
+		return
+	}
+	if len(args) != 1 {
+		fmt.Fprintf(os.Stderr, "error: too many arguments")
+		os.Exit(2)
+	}
+	for _, cmd := range commands {
+		if cmd.Name() == args[0] {
+			cmd.PrintLongUsage()
+			return
+		}
+	}
 
-// func printUsageTo(..., ...) {
-// 	...
-// }
+	fmt.Fprintf(os.Stderr, "error: unrecognized command: %s\n", args[0])
+	fmt.Fprintf(os.Stderr, "Run 'zk help' for usage.\n")
+	os.Exit(2)
+}
 
 var commands = []*Command{
 	cmdExists,
@@ -66,7 +90,7 @@ var commands = []*Command{
 func main() {
 	args := os.Args[1:]
 	if len(args) < 1 || strings.IndexRune(args[0], '-') == 0 {
-		printUsageTo(os.Stderr)
+		printOverviewUsage(os.Stderr)
 		os.Exit(2)
 	}
 
@@ -116,6 +140,6 @@ func must(err error) {
 }
 
 func failUsage(cmd *Command) {
-	cmd.PrintUsage()
-	os.Exit(2)
+       cmd.PrintUsage()
+       os.Exit(2)
 }

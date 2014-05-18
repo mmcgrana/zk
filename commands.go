@@ -35,16 +35,16 @@ func runWatch(cmd *Command, args []string) {
 	}
 	path := args[0]
 	conn := connect()
-	var events chan zk.Event
+	var events <-chan zk.Event
 	var present bool
+	var err error
 	if !optWatch {
-		present, _, err := conn.Exists(path)
-		must(err)
+		present, _, err = conn.Exists(path)
 		
 	} else {
-		present, _, events, err := conn.ExistsW(path)
-		must(err)		
+		present, _, events, err = conn.ExistsW(path)
 	}
+	must(err)
 	if present {
 		outString("y")
 	} else {

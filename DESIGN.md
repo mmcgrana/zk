@@ -7,13 +7,13 @@ Usage: zk <command> [arguments] [options]                              | out
                                                                        | out
 Commands:                                                              | out
                                                                        | out
-    exists             show if node exists                             | out
-    stat               show node details                               | out
-    get                show node data                                  | out
-    create             create node with initial data                   | out
-    set                write node data                                 | out
-    delete             delete node                                     | out
-    children           list node children                              | out
+    exists      show if node exists                                    | out
+    stat        show node details                                      | out
+    get         show node data                                         | out
+    create      create node with initial data                          | out
+    set         write node data                                        | out
+    delete      delete node                                            | out
+    children    list node children                                     | out
                                                                        | out
 Run 'zk help <command>' for details.                                   | out 0
 ```
