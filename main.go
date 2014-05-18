@@ -17,16 +17,6 @@ type Command struct {
 	Run   func(cmd *Command, args []string)
 }
 
-func (c *Command) PrintUsage() {
-	fmt.Fprintf(os.Stderr, "Usage: zk %s\n", c.Usage)
-	fmt.Fprintf(os.Stderr, "Run 'zk help %s' for details.\n", c.Name())
-}
-
-func (c *Command) PrintLongUsage() {
-	fmt.Printf("Usage: zk %s\n\n", c.Usage)
-	fmt.Println(strings.Trim(c.Long, "\n"))
-}
-
 func (c *Command) Name() string {
 	name := c.Usage
 	i := strings.Index(name, " ")
@@ -34,6 +24,11 @@ func (c *Command) Name() string {
 		name = name[:i]
 	}
 	return name
+}
+
+func (c *Command) PrintUsage() {
+	fmt.Fprintf(os.Stderr, "Usage: zk %s\n", c.Usage)
+	fmt.Fprintf(os.Stderr, "Run 'zk help %s' for details.\n", c.Name())
 }
 
 func printOverviewUsage(w io.Writer) {
@@ -45,6 +40,11 @@ func printOverviewUsage(w io.Writer) {
 	}
 	fmt.Fprintf(w, "\n")
 	fmt.Fprintf(w, "Run 'zk help <command>' for details.\n")
+}
+
+func printCommandUsage(c *Command) {
+	fmt.Printf("Usage: zk %s\n\n", c.Usage)
+	fmt.Println(strings.Trim(c.Long, "\n"))
 }
 
 var cmdHelp = &Command{
@@ -67,11 +67,10 @@ func runHelp(cmd *Command, args []string) {
 	}
 	for _, cmd := range commands {
 		if cmd.Name() == args[0] {
-			cmd.PrintLongUsage()
+			printCommandUsage(cmd)
 			return
 		}
 	}
-
 	fmt.Fprintf(os.Stderr, "error: unrecognized command: %s\n", args[0])
 	fmt.Fprintf(os.Stderr, "Run 'zk help' for usage.\n")
 	os.Exit(2)
