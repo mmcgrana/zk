@@ -23,7 +23,12 @@ var cmdExists = &Command{
 	Long: `
 Exists checks for a node at the given path and writes "y" or "n" to
 stdout according to its presence. If --watch is used, waits for a
-change in the presence of the node before exiting.`,
+change in the presence of the node before exiting.
+
+Example:
+
+    $ zk exists /path
+    y`,
 	Run: runWatch,
 }
 
@@ -58,7 +63,21 @@ var cmdStat = &Command{
 	Usage: "stat <path>",
 	Short: "show node details",
 	Long: `
-Stat writes to stdout details of the node at the given path.`,
+Stat writes to stdout details of the node at the given path.
+
+Example:
+
+    $ zk stat /path
+    Czxid:          337
+    Mzxid:          460
+    Ctime:          2014-05-17T08:11:24-07:00
+    Mtime:          2014-05-17T14:49:45-07:00
+    Version:        1
+    Cversion:       3
+    Aversion:       0
+    EphemeralOwner: 0
+    DataLength:     3
+    Pzxid:          413`,
 	Run: runStat,
 }
 
@@ -92,7 +111,12 @@ var cmdGet = &Command{
 	Short: "show node data",
 	Long: `
 Get reads the node data at the given path and writes it to stdout.
-If --watch is used, waits for a change to the node before exiting.`,
+If --watch is used, waits for a change to the node before exiting.
+
+Example:
+
+    $ zk get /path
+    content`,
 	Run: runGet,
 }
 
@@ -120,7 +144,11 @@ var cmdCreate = &Command{
 	Short: "create node with initial data",
 	Long: `
 Create makes a new node at the given path with the data given by
-reading stdin.`,
+reading stdin.
+
+Example:
+
+    $ echo content | zk create /path`,
 	Run: runCreate,
 }
 
@@ -144,7 +172,15 @@ var cmdSet = &Command{
 Set updates the node at the given path with the data given by
 reading stdin. If a version is given, submits that version with the
 write request for verification, otherwise reads the current version
-before attempting a write.`,
+before attempting a write.
+
+Examples:
+
+    $ echo new-content | zk set /path
+
+    $ zk stat /path | grep Version
+    Version:        3
+    $ echo new-content | zk set /path 3`,
 	Run: runSet,
 }
 
@@ -176,7 +212,15 @@ var cmdDelete = &Command{
 	Long: `
 Delete removes the node at the given path. If a version is given,
 submits that version with the write request for verification,
-otherwise reads the current version before attempting a write.`,
+otherwise reads the current version before attempting a write.
+
+Examples:
+
+    $ zk delete /path
+
+    $ zk stat /path | grep Version
+    Version:        7
+    $ zk delete /path 7`,
 	Run: runDelete,
 }
 
@@ -207,7 +251,14 @@ var cmdChildren = &Command{
 	Long: `
 Children lists the names of the children of the node at the given
 path, one name per line. If --watch is used, it waits for a change
-in the names of given node's children before returning.`,
+in the names of given node's children before returning.
+
+Example:
+
+    $ zk children /people
+    alice
+    bob
+    fred`,
 	Run: runChildren,
 }
 

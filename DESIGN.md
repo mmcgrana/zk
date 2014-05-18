@@ -16,22 +16,19 @@ Commands:                                                              | out
     children    list node children                                     | out
     help        show help                                              | out
                                                                        | out
-Run 'zk help <command>' for details.                                   | out 0
+Run 'zk help <command>' for details.                                   | out 2, (zk help = 0)
 ```
 
 ```
 $ zk help get
 Usage: zk get <path> [--watch]                                         | out
                                                                        | out
-Get reads the node data at the given path and writes it to stdout. If  | out
---watch is used, waits for a change to the node before exiting.        | out
+Get reads the node data at the given path and writes it to stdout.     |out
+If --watch is used, waits for a change to the node before exiting.     | out
                                                                        | out
-Examples:                                                              | out
+Example:                                                               | out
                                                                        | out
-    $ zk get /foo                                                      | out
-    bar                                                                | out
-                                                                       | out
-    $ zk get /foo --watch                                              | out
+    $ zk get /path                                                     | out
     bar                                                                | out 0
 ```
 
