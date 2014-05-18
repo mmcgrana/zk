@@ -60,7 +60,7 @@ to trigger the installation of corresponding watches on the
 requested node. For example:
 
 ```console
-$ bash -c "sleep 10; echo second-value | zk set /key"
+$ bash -c "sleep 10; echo second-value | zk set /key" &
 
 $ zk get /key --watch   # pauses for ~10s, then returns
 first-value
