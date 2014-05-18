@@ -92,7 +92,7 @@ You may be interested in these other Zookeper command line clients:
 
 The `zk` project borrows much of its CLI scaffolding and therefore
 CLI aesthetic from the [`hk`](https://github.com/heroku/hk) project.
-Like `hk`, `zk` is designed to behave like standard Unix tools and
+Like `hk`, `zk` is designed to behave like a standard Unix tool and
 be composed with other such tools.
 
 Copyright of the borrowed portions of `zk`'s code remains with the
