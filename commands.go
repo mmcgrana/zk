@@ -40,7 +40,7 @@ func runWatch(cmd *Command, args []string) {
 	var err error
 	if !optWatch {
 		present, _, err = conn.Exists(path)
-		
+
 	} else {
 		present, _, events, err = conn.ExistsW(path)
 	}
@@ -56,7 +56,7 @@ func runWatch(cmd *Command, args []string) {
 	}
 }
 
-var cmdStat = &Command {
+var cmdStat = &Command{
 	Usage: "stat <path>",
 	Short: "show node details",
 	Long: `
@@ -112,12 +112,12 @@ func runGet(cmd *Command, args []string) {
 		data, _, events, err := conn.GetW(path)
 		must(err)
 		outData(data)
-		evt := <- events
+		evt := <-events
 		must(evt.Err)
 	}
 }
 
-var cmdCreate = &Command {
+var cmdCreate = &Command{
 	Usage: "create <path>",
 	Short: "create node with initial data",
 	Long: `
@@ -132,14 +132,14 @@ func runCreate(cmd *Command, args []string) {
 	}
 	path := args[0]
 	conn := connect()
-	data := inData() 
+	data := inData()
 	flags := int32(0)
 	acl := zk.WorldACL(zk.PermAll)
 	_, err := conn.Create(path, data, flags, acl)
 	must(err)
 }
 
-var cmdSet = &Command {
+var cmdSet = &Command{
 	Usage: "set <path> [version]",
 	Short: "write node data",
 	Long: `
@@ -172,7 +172,7 @@ func runSet(cmd *Command, args []string) {
 	must(err)
 }
 
-var cmdDelete = &Command {
+var cmdDelete = &Command{
 	Usage: "delete <path> [version]",
 	Short: "delete node",
 	Long: `
@@ -203,7 +203,7 @@ func runDelete(cmd *Command, args []string) {
 	must(err)
 }
 
-var cmdChildren = &Command {
+var cmdChildren = &Command{
 	Usage: "children <path> [--watch]",
 	Short: "list children of a node",
 	Long: `
@@ -233,7 +233,7 @@ func runChildren(cmd *Command, args []string) {
 		for _, child := range children {
 			outString("%s\n", child)
 		}
-		evt := <- events
+		evt := <-events
 		must(evt.Err)
 	}
 }
