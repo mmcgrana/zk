@@ -1,8 +1,8 @@
 ## zk
 
 `zk` is a command line client to the [Zookeeper](http://zookeeper.apache.org/)
-distributed storage service designed to be simple to install, fast,
-and Unix-friendly.
+distributed storage service designed to be fast, easy to install,
+and Unix-friendly. It's written in Go.
 
 ### Getting Started
 
