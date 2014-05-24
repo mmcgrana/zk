@@ -48,6 +48,7 @@ func runWatch(cmd *Command, args []string) {
 	}
 	path := args[0]
 	conn := connect()
+	defer conn.Close()
 	var events <-chan zk.Event
 	var present bool
 	var err error
@@ -102,6 +103,7 @@ func runStat(cmd *Command, args []string) {
 	}
 	path := args[0]
 	conn := connect()
+	defer conn.Close()
 	_, stat, err := conn.Get(path)
 	must(err)
 	outString("Czxid:          %d\n", stat.Czxid)
@@ -136,6 +138,7 @@ func runGet(cmd *Command, args []string) {
 	}
 	path := args[0]
 	conn := connect()
+	defer conn.Close()
 	if !optWatch {
 		data, _, err := conn.Get(path)
 		must(err)
@@ -168,6 +171,7 @@ func runCreate(cmd *Command, args []string) {
 	}
 	path := args[0]
 	conn := connect()
+	defer conn.Close()
 	data := inData()
 	flags := int32(0)
 	acl := zk.WorldACL(zk.PermAll)
@@ -201,6 +205,7 @@ func runSet(cmd *Command, args []string) {
 	path := args[0]
 	readVersion := len(args) == 1
 	conn := connect()
+	defer conn.Close()
 	data := inData()
 	var version int32
 	if readVersion {
@@ -241,6 +246,7 @@ func runDelete(cmd *Command, args []string) {
 	path := args[0]
 	readVersion := len(args) == 1
 	conn := connect()
+	defer conn.Close()
 	var version int32
 	if readVersion {
 		_, stat, err := conn.Get(path)
@@ -278,6 +284,7 @@ func runChildren(cmd *Command, args []string) {
 	}
 	path := args[0]
 	conn := connect()
+	defer conn.Close()
 	if !optWatch {
 		children, _, err := conn.Children(path)
 		must(err)
