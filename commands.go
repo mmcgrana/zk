@@ -60,9 +60,9 @@ func runWatch(cmd *Command, args []string) {
 	}
 	must(err)
 	if present {
-		outString("y")
+		outString("y\n")
 	} else {
-		outString("n")
+		outString("n\n")
 	}
 	if events != nil {
 		evt := <-events
