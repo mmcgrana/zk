@@ -185,8 +185,9 @@ var cmdSet = &Command{
 	Long: `
 Set updates the node at the given path with the data given by
 reading stdin. If a version is given, submits that version with the
-write request for verification, otherwise reads the current version
-before attempting a write.
+write request for verification against the current version.
+Otherwise set will clobber the current data regardless of its
+version.
 
 Examples:
 
@@ -203,15 +204,13 @@ func runSet(cmd *Command, args []string) {
 		failUsage(cmd)
 	}
 	path := args[0]
-	readVersion := len(args) == 1
+	clobber := len(args) == 1
 	conn := connect()
 	defer conn.Close()
 	data := inData()
 	var version int32
-	if readVersion {
-		_, stat, err := conn.Get(path)
-		must(err)
-		version = stat.Version
+	if clobber {
+		version = -1
 	} else {
 		versionParsed, err := strconv.Atoi(args[1])
 		must(err)
@@ -226,8 +225,9 @@ var cmdDelete = &Command{
 	Short: "delete node",
 	Long: `
 Delete removes the node at the given path. If a version is given,
-submits that version with the write request for verification,
-otherwise reads the current version before attempting a write.
+submits that version with the delete request for verification
+against the current version. Otherwise delete will clobber the
+current data regardless of its version.
 
 Examples:
 
@@ -244,14 +244,12 @@ func runDelete(cmd *Command, args []string) {
 		failUsage(cmd)
 	}
 	path := args[0]
-	readVersion := len(args) == 1
+	clobber := len(args) == 1
 	conn := connect()
 	defer conn.Close()
 	var version int32
-	if readVersion {
-		_, stat, err := conn.Get(path)
-		must(err)
-		version = stat.Version
+	if clobber {
+		version = -1
 	} else {
 		versionParsed, err := strconv.Atoi(args[1])
 		must(err)
