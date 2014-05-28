@@ -97,7 +97,7 @@ be composed with other such tools.
 
 ### Contributing
 
-Please see [CONTRIBUTING.md](contributing.md).
+Please see [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ### License
 
