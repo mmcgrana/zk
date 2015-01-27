@@ -28,6 +28,7 @@ func (c *Command) Name() string {
 
 func printOverviewUsage(w io.Writer) {
 	fmt.Fprintf(w, "Usage: zk <command> [options] [arguments]\n")
+	fmt.Fprintf(w, "\naccepted environment var: ZOOKEEPER_SERVERS\n")
 	fmt.Fprintf(w, "\n")
 	fmt.Fprintf(w, "Commands:\n")
 	for _, command := range commands {
