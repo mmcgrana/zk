@@ -288,10 +288,11 @@ func showChildrenRecursively(conn *zk.Conn, path string) {
 	for _, child := range children {
 		if path == "/" {
 			outString("%s\n", path+child)
+			showChildrenRecursively(conn, path+child)
 		} else {
 			outString("%s\n", path+"/"+child)
+			showChildrenRecursively(conn, path+"/"+child)
 		}
-		showChildrenRecursively(conn, path+child)
 	}
 }
 
