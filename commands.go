@@ -2,7 +2,11 @@ package main
 
 import (
 	"github.com/samuel/go-zookeeper/zk"
+	
+	"bufio"
 	"os"
+	"path"
+	"path/filepath"
 	"sort"
 	"strings"
 	"strconv"
@@ -25,6 +29,7 @@ func connect() *zk.Conn {
 
 var (
 	optWatch bool
+	destDir string
 )
 
 var cmdExists = &Command{
@@ -46,17 +51,17 @@ func runWatch(cmd *Command, args []string) {
 	if !(len(args) == 1) {
 		failUsage(cmd)
 	}
-	path := args[0]
+	nodePath := args[0]
 	conn := connect()
 	defer conn.Close()
 	var events <-chan zk.Event
 	var present bool
 	var err error
 	if !optWatch {
-		present, _, err = conn.Exists(path)
+		present, _, err = conn.Exists(nodePath)
 
 	} else {
-		present, _, events, err = conn.ExistsW(path)
+		present, _, events, err = conn.ExistsW(nodePath)
 	}
 	must(err)
 	if present {
@@ -101,10 +106,10 @@ func runStat(cmd *Command, args []string) {
 	if !(len(args) == 1) {
 		failUsage(cmd)
 	}
-	path := args[0]
+	nodePath := args[0]
 	conn := connect()
 	defer conn.Close()
-	_, stat, err := conn.Get(path)
+	_, stat, err := conn.Get(nodePath)
 	must(err)
 	outString("Czxid:          %d\n", stat.Czxid)
 	outString("Mzxid:          %d\n", stat.Mzxid)
@@ -136,15 +141,15 @@ func runGet(cmd *Command, args []string) {
 	if !(len(args) == 1) {
 		failUsage(cmd)
 	}
-	path := args[0]
+	nodePath := args[0]
 	conn := connect()
 	defer conn.Close()
 	if !optWatch {
-		data, _, err := conn.Get(path)
+		data, _, err := conn.Get(nodePath)
 		must(err)
 		outData(data)
 	} else {
-		data, _, events, err := conn.GetW(path)
+		data, _, events, err := conn.GetW(nodePath)
 		must(err)
 		outData(data)
 		evt := <-events
@@ -169,13 +174,13 @@ func runCreate(cmd *Command, args []string) {
 	if !(len(args) == 1) {
 		failUsage(cmd)
 	}
-	path := args[0]
+	nodePath := args[0]
 	conn := connect()
 	defer conn.Close()
 	data := inData()
 	flags := int32(0)
 	acl := zk.WorldACL(zk.PermAll)
-	_, err := conn.Create(path, data, flags, acl)
+	_, err := conn.Create(nodePath, data, flags, acl)
 	must(err)
 }
 
@@ -203,7 +208,7 @@ func runSet(cmd *Command, args []string) {
 	if !(len(args) == 1 || len(args) == 2) {
 		failUsage(cmd)
 	}
-	path := args[0]
+	nodePath := args[0]
 	clobber := len(args) == 1
 	conn := connect()
 	defer conn.Close()
@@ -216,7 +221,7 @@ func runSet(cmd *Command, args []string) {
 		must(err)
 		version = int32(versionParsed)
 	}
-	_, err := conn.Set(path, data, version)
+	_, err := conn.Set(nodePath, data, version)
 	must(err)
 }
 
@@ -243,7 +248,7 @@ func runDelete(cmd *Command, args []string) {
 	if !(len(args) == 1 || len(args) == 2) {
 		failUsage(cmd)
 	}
-	path := args[0]
+	nodePath := args[0]
 	clobber := len(args) == 1
 	conn := connect()
 	defer conn.Close()
@@ -255,7 +260,7 @@ func runDelete(cmd *Command, args []string) {
 		must(err)
 		version = int32(versionParsed)
 	}
-	err := conn.Delete(path, version)
+	err := conn.Delete(nodePath, version)
 	must(err)
 }
 
@@ -280,18 +285,18 @@ func runChildren(cmd *Command, args []string) {
 	if !(len(args) == 1) {
 		failUsage(cmd)
 	}
-	path := args[0]
+	nodePath := args[0]
 	conn := connect()
 	defer conn.Close()
 	if !optWatch {
-		children, _, err := conn.Children(path)
+		children, _, err := conn.Children(nodePath)
 		must(err)
 		sort.Strings(children)
 		for _, child := range children {
 			outString("%s\n", child)
 		}
 	} else {
-		children, _, events, err := conn.ChildrenW(path)
+		children, _, events, err := conn.ChildrenW(nodePath)
 		must(err)
 		sort.Strings(children)
 		for _, child := range children {
@@ -302,8 +307,165 @@ func runChildren(cmd *Command, args []string) {
 	}
 }
 
+var cmdMirror = &Command{
+	Usage: "mirror <path> [-d <destination>]",
+	Short: "recursively get node children and data, and save to disk",
+	Long: `
+Mirror recursively gets nodes and data starting at the node at the 
+given path, saving the result to file.
+
+Example:
+
+    $ zk mirror /people
+    `,
+	Run: runMirror,
+}
+
+type NodeTree struct {
+	PathPrefix string
+	Name string
+	Children []*NodeTree
+	Data []byte
+}
+
+func NewNodeTree(name string, pathPrefix string, data []byte) *NodeTree {
+	return &NodeTree{
+		PathPrefix: pathPrefix,
+		Name: name,
+		Children: make([]*NodeTree, 0),
+		Data: data,
+	}
+}
+
+func (self *NodeTree) AddChild(child *NodeTree) {
+	self.Children = append(self.Children, child)
+}
+
+func (self *NodeTree) Print() {
+	outString("%s\n", self.Name)
+	if self.Data != nil {
+		outString("%s\n", string(self.Data))
+	}
+	for _, node := range self.Children {
+		node.Print()
+	}
+}
+
+func saveNodeData(nodeFsPath string, nodeTree *NodeTree) error {
+	var nodeFile *os.File
+	var err error
+	
+	if nodeFile, err = os.Create(nodeFsPath); err != nil {
+		return err
+	}
+	defer nodeFile.Close()
+
+	writer := bufio.NewWriter(nodeFile)
+	
+	writer.Write(nodeTree.Data)
+
+	writer.Flush()
+
+	return nil
+}
+
+func saveNodeTree(dirPath string, nodeTree *NodeTree) error {
+	var err error
+	
+	nodeFsPath := filepath.Join(dirPath, nodeTree.Name)
+	
+	if len(nodeTree.Children) == 0 {
+		saveNodeData(nodeFsPath, nodeTree)
+	} else {
+		if err = os.Mkdir(nodeFsPath, os.ModeDir | 0755); err != nil {
+			if os.IsExist(err) {
+				// ok
+			} else {
+				return err
+			}
+		}
+
+		if nodeTree.Data != nil && len(nodeTree.Data) != 0 {
+			nodeDataPath := filepath.Join(nodeFsPath, "_data")
+			if err = saveNodeData(nodeDataPath, nodeTree); err != nil {
+				return err
+			}
+		}
+
+		for _, child := range nodeTree.Children {
+			if err = saveNodeTree(nodeFsPath, child); err != nil {
+				return err
+			}
+		}
+	}
+	
+	return nil
+}
+
+func appendPath(nodePath string, name string) string {
+	return path.Join(nodePath, name)
+}
+
+func mirrorNode(conn *zk.Conn, node *NodeTree) error {
+	var err error
+	var children []string
+	
+	nodePath := appendPath(node.PathPrefix, node.Name)
+	
+	if children, _, err = conn.Children(nodePath); err != nil {
+		return err
+	}
+	
+	for _, child := range children {
+		var data []byte
+		
+		childPath := appendPath(nodePath, child)
+		
+		if data, _, err = conn.Get(childPath); err != nil {
+			return err
+		}
+
+		childNode := NewNodeTree(child, nodePath, data)
+		
+		node.AddChild(childNode)
+
+		if err := mirrorNode(conn, childNode); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func mirrorNodePath(conn *zk.Conn, nodePath string) (*NodeTree, error) {
+	root := NewNodeTree("", nodePath, nil)
+	
+	if err := mirrorNode(conn, root); err != nil {
+		return nil, err
+	}
+
+	return root, nil
+}
+
+func runMirror(cmd *Command, args []string) {
+	if !(len(args) == 1) {
+		failUsage(cmd)
+	}
+	nodePath := args[0]
+	conn := connect()
+	defer conn.Close()
+	nodeTree, err := mirrorNodePath(conn, nodePath)
+	must(err)
+	var cwd string
+	cwd, err = os.Getwd()
+	must(err)
+	err = saveNodeTree(filepath.Join(cwd, destDir), nodeTree)
+	must(err)
+}
+
 func init() {
 	cmdExists.Flag.BoolVarP(&optWatch, "watch", "w", false, "watch for a change to node presence before returning")
 	cmdGet.Flag.BoolVarP(&optWatch, "watch", "w", false, "watch for a change to node state before returning")
 	cmdChildren.Flag.BoolVarP(&optWatch, "watch", "w", false, "watch for a change to node children names before returning")
+	cmdMirror.Flag.StringVarP(&destDir, "dest", "d", "", "destination directory in which to save node tree data")
 }
