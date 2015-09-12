@@ -145,4 +145,5 @@ func outString(p string, args ...interface{}) {
 
 func outData(d []byte) {
 	os.Stdout.Write(d)
+	fmt.Println()
 }
