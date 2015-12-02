@@ -5,6 +5,7 @@ import (
 	"github.com/bgentry/pflag"
 	"io"
 	"io/ioutil"
+	"log"
 	"os"
 	"strings"
 )
@@ -80,6 +81,7 @@ func runHelp(cmd *Command, args []string) {
 var commands []*Command
 
 func init() {
+	log.SetOutput(ioutil.Discard)
 	commands = []*Command{
 		cmdExists,
 		cmdStat,
@@ -145,5 +147,4 @@ func outString(p string, args ...interface{}) {
 
 func outData(d []byte) {
 	os.Stdout.Write(d)
-	fmt.Println()
 }
