@@ -4,8 +4,8 @@ import (
 	"github.com/samuel/go-zookeeper/zk"
 	"os"
 	"sort"
-	"strings"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -16,6 +16,7 @@ func servers() []string {
 	}
 	return strings.Split(s, ",")
 }
+
 func connect() *zk.Conn {
 	svs := servers()
 	conn, _, err := zk.Connect(svs, time.Second)
@@ -24,7 +25,8 @@ func connect() *zk.Conn {
 }
 
 var (
-	optWatch bool
+	optWatch  bool
+	recursive bool
 )
 
 var cmdExists = &Command{
@@ -260,7 +262,7 @@ func runDelete(cmd *Command, args []string) {
 }
 
 var cmdChildren = &Command{
-	Usage: "children <path> [--watch]",
+	Usage: "ls <path> [--watch] [-R]",
 	Short: "list node children",
 	Long: `
 Children lists the names of the children of the node at the given
@@ -269,11 +271,29 @@ in the names of given node's children before returning.
 
 Example:
 
-    $ zk children /people
+    $ zk ls /people
     alice
     bob
     fred`,
 	Run: runChildren,
+}
+
+func showChildrenRecursively(conn *zk.Conn, path string) {
+	children, _, err := conn.Children(path)
+	if err != nil {
+		return
+	}
+
+	sort.Strings(children)
+	for _, child := range children {
+		if path == "/" {
+			outString("%s\n", path+child)
+			showChildrenRecursively(conn, path+child)
+		} else {
+			outString("%s\n", path+"/"+child)
+			showChildrenRecursively(conn, path+"/"+child)
+		}
+	}
 }
 
 func runChildren(cmd *Command, args []string) {
@@ -284,6 +304,10 @@ func runChildren(cmd *Command, args []string) {
 	conn := connect()
 	defer conn.Close()
 	if !optWatch {
+		if recursive {
+			showChildrenRecursively(conn, path)
+			return
+		}
 		children, _, err := conn.Children(path)
 		must(err)
 		sort.Strings(children)
@@ -306,4 +330,5 @@ func init() {
 	cmdExists.Flag.BoolVarP(&optWatch, "watch", "w", false, "watch for a change to node presence before returning")
 	cmdGet.Flag.BoolVarP(&optWatch, "watch", "w", false, "watch for a change to node state before returning")
 	cmdChildren.Flag.BoolVarP(&optWatch, "watch", "w", false, "watch for a change to node children names before returning")
+	cmdChildren.Flag.BoolVarP(&recursive, "recursive", "R", false, "recursively list subdirectories encountered")
 }
